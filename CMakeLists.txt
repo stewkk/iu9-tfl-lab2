@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.15..3.29)
+
+project(
+  tfl-lab2
+  VERSION 0.0.1
+  LANGUAGES CXX
+)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+
+add_subdirectory(src/learner)
+
