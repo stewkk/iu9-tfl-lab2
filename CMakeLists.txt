@@ -6,9 +6,17 @@ project(
   LANGUAGES CXX
 )
 
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}")
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(src/learner)
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  include(CTest)
+  if(BUILD_TESTING)
+    add_subdirectory(test)
+  endif()
+endif()
