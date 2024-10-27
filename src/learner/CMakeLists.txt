@@ -1,4 +1,4 @@
-add_library(liblearner learner.cpp)
+add_library(liblearner learner.cpp teacher.hpp teacher.cpp learner_impl.hpp)
 add_library(stewkk::liblearner ALIAS liblearner)
 target_compile_features(liblearner PUBLIC cxx_std_20)
 set_target_properties(liblearner PROPERTIES
@@ -10,6 +10,9 @@ set_target_properties(liblearner PROPERTIES OUTPUT_NAME learner)
 target_include_directories(
   liblearner PUBLIC $<INSTALL_INTERFACE:include>
                     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+target_include_directories(
+  liblearner PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
 target_compile_options(liblearner PRIVATE ${BASE_COMPILE_FLAGS})
 
