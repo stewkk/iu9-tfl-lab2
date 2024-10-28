@@ -1,0 +1,3 @@
+[submodule "mat/advanced12iq"]
+	path = mat/advanced12iq
+	url = git@github.com:advanced12iq/tfl-lab2.git

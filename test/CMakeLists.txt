@@ -6,5 +6,5 @@ target_compile_options(unittests PRIVATE ${BASE_COMPILE_FLAGS})
 target_include_directories(
   unittests PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
-target_link_libraries(unittests PRIVATE stewkk::liblearner gmock_main)
+target_link_libraries(unittests PRIVATE stewkk::liblearner gtest_main)
 gtest_discover_tests(unittests)

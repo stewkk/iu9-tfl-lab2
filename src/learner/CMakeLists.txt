@@ -1,4 +1,4 @@
-add_library(liblearner learner.cpp teacher.hpp teacher.cpp learner_impl.hpp)
+add_library(liblearner learner.cpp teacher.hpp learner_impl.hpp)
 add_library(stewkk::liblearner ALIAS liblearner)
 target_compile_features(liblearner PUBLIC cxx_std_20)
 set_target_properties(liblearner PROPERTIES
