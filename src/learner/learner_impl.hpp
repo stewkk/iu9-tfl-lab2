@@ -26,18 +26,12 @@ public:
         extended_.insert(s);
     }
 
-    auto ContainsExtendedPrefix(const std::string& s) -> bool {
+    auto ContainsExtendedPrefix(const std::string& s) const -> bool {
         return extended_.contains(s);
     }
 
     auto Contains(const std::string& s) -> bool {
-        if (auto it = cache_.find(s); it != cache_.end()) {
-            return it->second;
-        }
-
-        auto res = teacher_language_.Contains(s);
-        cache_[s] = res;
-        return res;
+        return teacher_language_.Contains(s);
     }
 
     auto Extend() -> void {
@@ -50,7 +44,7 @@ public:
         }
     }
 
-    auto GetCounterexample() -> std::optional<std::string> const {
+    auto GetCounterexample() -> std::optional<std::string> {
         return teacher_language_.Equivalent(*this);
     }
 
@@ -66,7 +60,11 @@ public:
     auto GetRow(const std::string& prefix) -> std::string {
       std::string row;
       for (const auto &suffix : suffixes_) {
-        row.push_back(Contains(prefix + suffix));
+          if (Contains(prefix + suffix)) {
+              row.push_back('1');
+          } else {
+              row.push_back('0');
+          }
       }
       return row;
     }
@@ -82,10 +80,12 @@ public:
         std::unordered_set<std::string> main;
         for (const auto& prefix : prefixes_) {
             auto row = GetRow(prefix);
+            std::cerr << "prefix: " << prefix << ' ' << row << std::endl;
             main.insert(row);
         }
         for (const auto& prefix : extended_) {
             auto row = GetRow(prefix);
+            std::cerr << "extended: " << prefix << ' ' << row << std::endl;
 
             if (!main.contains(row)) {
                 prefixes_.insert(prefix);
@@ -122,8 +122,23 @@ public:
         return madeChanges;
     }
 
+    auto GetPrefixes() const -> const std::unordered_set<std::string>& {
+        return prefixes_;
+    }
+
+    auto GetExtended() const -> const std::unordered_set<std::string>& {
+        return extended_;
+    }
+
+    auto GetSuffixes() const -> const std::unordered_set<std::string>& {
+        return suffixes_;
+    }
+
+    auto Get() const -> const std::unordered_set<std::string>& {
+        return suffixes_;
+    }
+
 private:
-    std::unordered_map<std::string, bool> cache_;
     std::unordered_set<std::string> prefixes_;
     std::unordered_set<std::string> suffixes_;
     std::unordered_set<std::string> extended_;
@@ -144,21 +159,27 @@ public:
         // квадрата (это комба), и просто добавить их с помощью AddPrefix,
         // AddSuffix
 
-        while (true) {
+        for (int i = 0; i < 10; i++) {
             table_.Extend();
 
             if (table_.MakeClosed()) {
+                std::cerr << "Close" << std::endl;
                 continue;
             }
 
             if (table_.MakeConsistent()) {
+                std::cerr << "Consistent" << std::endl;
                 continue;
             }
+
+            std::cerr << "Counterexample" << std::endl;
 
             auto counterexample = table_.GetCounterexample();
             if (!counterexample.has_value()) {
                 return;
             }
+
+            std::cerr << "Got counterexample: " << counterexample.value() << std::endl;
 
             table_.AddExample(counterexample.value());
         }
