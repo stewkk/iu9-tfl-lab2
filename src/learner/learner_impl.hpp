@@ -16,14 +16,26 @@ public:
 
     auto AddPrefix(const std::string& s) -> void {
         prefixes_.insert(s);
+        for (const auto& suffix : suffixes_) {
+            Contains(s+suffix);
+        }
     }
 
     auto AddSuffix(const std::string& s) -> void {
         suffixes_.insert(s);
+        for (const auto& prefix : prefixes_) {
+            Contains(prefix+s);
+        }
+        for (const auto& prefix : extended_) {
+            Contains(prefix+s);
+        }
     }
 
     auto AddExtendedPrefix(const std::string& s) -> void {
         extended_.insert(s);
+        for (const auto& suffix : suffixes_) {
+            Contains(s+suffix);
+        }
     }
 
     auto ContainsExtendedPrefix(const std::string& s) const -> bool {
@@ -38,8 +50,9 @@ public:
         for (const auto& prefix : prefixes_) {
             for (auto l : std::array{'N', 'S', 'W', 'E'}) {
                 auto extent = prefix+l;
-                if (!prefixes_.contains(extent))
-                extended_.insert(extent);
+                if (!prefixes_.contains(extent)) {
+                    AddExtendedPrefix(extent);
+                }
             }
         }
     }
@@ -52,7 +65,7 @@ public:
         for (auto it = example.cbegin(); it != example.cend(); ++it) {
             std::string suffix(it, example.cend());
             if (!suffixes_.contains(suffix)) {
-                suffixes_.insert(suffix);
+                AddSuffix(suffix);
             }
         }
     }
@@ -75,6 +88,8 @@ public:
         // нет в верхней части, надо добавить в верхнюю часть префиксы, которые
         // соответствуют этой строке в расширенной части (их может быть несколько)
 
+        std::cerr << "MakeClosed" << std::endl;
+
         bool madeChanges = false;
 
         std::unordered_set<std::string> main;
@@ -83,13 +98,18 @@ public:
             std::cerr << "prefix: " << prefix << ' ' << row << std::endl;
             main.insert(row);
         }
-        for (const auto& prefix : extended_) {
+
+        for (auto it = extended_.begin(); it != extended_.end();) {
+            const auto& prefix = *it;
             auto row = GetRow(prefix);
             std::cerr << "extended: " << prefix << ' ' << row << std::endl;
 
             if (!main.contains(row)) {
-                prefixes_.insert(prefix);
+                AddPrefix(prefix);
+                it = extended_.erase(it);
                 madeChanges = true;
+            } else {
+                ++it;
             }
         }
 
@@ -97,6 +117,8 @@ public:
     }
 
     auto MakeConsistent() -> bool {
+        std::cerr << "MakeConsistent" << std::endl;
+
         bool madeChanges = false;
         std::unordered_map<std::string, std::vector<std::string>> main;
         for (const auto& prefix : prefixes_) {
@@ -109,7 +131,7 @@ public:
                         const auto cur_suffixes = suffixes_;
                         for (const auto& suffix : cur_suffixes) {
                             if (Contains(lhs+suffix) != Contains(rhs+suffix)) {
-                                AddSuffix(suffix);
+                                AddSuffix(y+suffix);
                                 madeChanges = true;
                             }
                         }
@@ -159,7 +181,7 @@ public:
         // квадрата (это комба), и просто добавить их с помощью AddPrefix,
         // AddSuffix
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             table_.Extend();
 
             if (table_.MakeClosed()) {
@@ -169,13 +191,14 @@ public:
 
             if (table_.MakeConsistent()) {
                 std::cerr << "Consistent" << std::endl;
-                continue;
+                // continue;
             }
 
             std::cerr << "Counterexample" << std::endl;
 
             auto counterexample = table_.GetCounterexample();
             if (!counterexample.has_value()) {
+                std::cerr << "Success!" << std::endl;
                 return;
             }
 
