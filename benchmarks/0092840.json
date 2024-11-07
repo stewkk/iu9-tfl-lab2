@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "command": "rm -f fifo logs mat.log && mkfifo fifo && time build/bin/learner 3 3 < fifo | HEIGHT=3 WIDTH=3 RANDOM_SEED=123 python mat/advanced12iq/main.py 2>mat.errlogs > fifo || echo \"Done\"",
+      "mean": 17.17913829988,
+      "stddev": 0.2667969008561643,
+      "median": 17.09359347148,
+      "user": 11.52348452,
+      "system": 11.603679600000001,
+      "min": 16.81350367498,
+      "max": 17.72987568198,
+      "times": [
+        17.06121714398,
+        16.81350367498,
+        17.09338806698,
+        17.45360989098,
+        17.09379887598,
+        16.93209557998,
+        17.72987568198,
+        17.27788802998,
+        17.28783490398,
+        17.04817114998
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}
