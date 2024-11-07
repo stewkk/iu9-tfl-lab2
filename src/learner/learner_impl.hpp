@@ -12,7 +12,10 @@ namespace learner {
 
 class Table {
 public:
-    Table(TeacherLanguage<Table> teacher) : teacher_language_(std::move(teacher)) {}
+    Table(std::int32_t n, std::int32_t m, TeacherLanguage<Table> teacher) :
+        n_(n),
+        m_(m),
+        teacher_language_(std::move(teacher)) {}
 
     auto AddPrefix(const std::string& s) -> void {
         prefixes_.insert(s);
@@ -132,6 +135,10 @@ public:
                         for (const auto& suffix : cur_suffixes) {
                             if (Contains(lhs+suffix) != Contains(rhs+suffix)) {
                                 AddSuffix(y+suffix);
+                                std::cerr << "Found distinguishing suffix: " << y+suffix << std::endl;
+                                if ((y+suffix).size() > n_+ n_/2 || (y+suffix).size() > m_ + m_/2) {
+                                    return false;
+                                }
                                 madeChanges = true;
                             }
                         }
@@ -165,12 +172,14 @@ private:
     std::unordered_set<std::string> suffixes_;
     std::unordered_set<std::string> extended_;
     TeacherLanguage<Table> teacher_language_;
+    std::int32_t n_;
+    std::int32_t m_;
 };
 
 class Learner {
 public:
     Learner(std::int32_t n, std::int32_t m, TeacherLanguage<Table> teacher)
-        : n_(n), m_(m), table_(std::move(teacher)) {}
+        : n_(n), m_(m), table_(n, m, std::move(teacher)) {}
 
     auto Build() -> void {
         // NOTE: init with epsilon
@@ -191,7 +200,7 @@ public:
 
             if (table_.MakeConsistent()) {
                 std::cerr << "Consistent" << std::endl;
-                // continue;
+                continue;
             }
 
             std::cerr << "Counterexample" << std::endl;
