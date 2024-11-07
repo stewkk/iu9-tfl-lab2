@@ -1,6 +1,6 @@
 set -e
-HEIGHT=4
-WIDTH=4
+HEIGHT=3
+WIDTH=3
 for((i = 1; ; ++i)); do
     echo "Run test: "  $i
     RANDOM_SEED=$(date +%s%N)

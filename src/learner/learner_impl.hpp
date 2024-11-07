@@ -181,7 +181,7 @@ public:
         // квадрата (это комба), и просто добавить их с помощью AddPrefix,
         // AddSuffix
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10000; i++) {
             table_.Extend();
 
             if (table_.MakeClosed()) {
