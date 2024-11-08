@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <cstdint>
+#include <fstream>
 
 namespace learner {
 
@@ -25,6 +27,11 @@ auto QueryContains(const std::string& s) -> bool {
     return false;
 }
 
+void WriteStats(const std::string& path, std::int32_t count_all, std::int32_t count_actual, std::int32_t equivalence) {
+    std::ofstream f(path);
+    f << count_all << ',' << count_actual << ',' << equivalence << std::endl;
+}
+
 }  // namespace
 
 template <typename Table>
@@ -34,15 +41,20 @@ public:
     // NOTE: последовательность префиксов, последовательность суффиксов, ф-ция для получения элемента таблицы
     auto Equivalent(const Table& table) -> std::optional<std::string>;
 
+    std::int32_t count_contains_all_ = 0;
+    std::int32_t count_contains_actual_ = 0;
+    std::int32_t count_equivalent_ = 0;
 private:
     std::unordered_map<std::string, bool> cache_;
 };
 
 template <typename Table>
 auto TeacherLanguage<Table>::Contains(const std::string& s) -> bool {
+    ++count_contains_all_;
     if (auto it = cache_.find(s); it != cache_.end()) {
         return it->second;
     }
+    ++count_contains_actual_;
     auto res = QueryContains(s);
     cache_[s] = res;
     return res;
@@ -50,6 +62,7 @@ auto TeacherLanguage<Table>::Contains(const std::string& s) -> bool {
 
 template <typename Table>
 auto TeacherLanguage<Table>::Equivalent(const Table& table) -> std::optional<std::string> {
+    ++count_equivalent_;
     std::cerr << "requesting equivalence" << std::endl;
     std::cout << "table" << std::endl;
     std::cerr << "table" << std::endl;
@@ -103,6 +116,7 @@ auto TeacherLanguage<Table>::Equivalent(const Table& table) -> std::optional<std
     std::string ans;
     std::cin >> ans;
     if (ans == "TRUE") {
+        WriteStats("benchmarks/queries", count_contains_all_, count_contains_actual_, count_equivalent_);
         return std::nullopt;
     }
     return ans;
