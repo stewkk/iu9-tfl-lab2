@@ -58,8 +58,9 @@ boost::process::environment GetCustomEnv(std::int32_t seed, std::int32_t height,
 class MATadvanced12iq {
 public:
         MATadvanced12iq(std::int32_t seed, std::int32_t height, std::int32_t width);
-        // TODO: delete copy constructors
         ~MATadvanced12iq();
+        MATadvanced12iq(const MATadvanced12iq&) = delete;
+        MATadvanced12iq& operator=(const MATadvanced12iq&) = delete;
         auto Contains(const std::string_view s) -> bool;
 public:
         boost::process::child mat_process_;
