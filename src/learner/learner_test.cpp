@@ -11,6 +11,7 @@
 #include <string_view>
 #include <cstdint>
 #include <unordered_map>
+#include <stdexcept>
 
 namespace learner {
 
@@ -48,8 +49,11 @@ auto QueryContains(RWStream& stream, const std::string_view s) -> bool {
 
     if (ans == "True") {
         return true;
+    } else if (ans == "False") {
+        return false;
     }
-    return false;
+
+    throw std::logic_error("got unexpected message from MAT");
 }
 
 boost::process::v2::process_environment GetCustomEnv(std::int32_t seed, std::int32_t height, std::int32_t width) {
