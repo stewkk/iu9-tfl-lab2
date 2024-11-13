@@ -1,16 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <boost/asio/write.hpp>
-#include <boost/asio/read_until.hpp>
-#include <boost/asio/system_executor.hpp>
-#include <boost/process/v2/process.hpp>
-#include <boost/process/v2/environment.hpp>
-#include <boost/process/v2/popen.hpp>
+#include <boost/process.hpp>
 
+#include <iostream>
 #include <format>
 #include <string_view>
 #include <cstdint>
-#include <unordered_map>
 #include <stdexcept>
 
 namespace learner {
@@ -31,19 +26,15 @@ auto GetMinPrefixInLang(Language auto& lang, const std::string_view path_in_lang
     return std::string(path_in_lang);
 }
 
-template <typename RWStream>
-auto QueryContains(RWStream& stream, const std::string_view s) -> bool {
+auto QueryContains(std::istream& in, std::ostream& out, const std::string_view s) -> bool {
     if (s == "") {
         return false;
     }
 
-    boost::asio::write(stream, boost::asio::buffer(std::format("isin\n{}\n", s)));
+    out << std::format("isin\n{}", s) << std::endl;
 
     std::string ans;
-    auto n_read = boost::asio::read_until(stream, boost::asio::dynamic_buffer(ans), '\n');
-    if (n_read > 0) {
-        ans.erase(ans.end()-1);
-    }
+    in >> ans;
 
     std::cerr << std::format("QueryContains({}) == {}\n", s, ans);
 
@@ -56,18 +47,12 @@ auto QueryContains(RWStream& stream, const std::string_view s) -> bool {
     throw std::logic_error("got unexpected message from MAT");
 }
 
-boost::process::v2::process_environment GetCustomEnv(std::int32_t seed, std::int32_t height, std::int32_t width) {
-  std::unordered_map<boost::process::v2::environment::key,
-                     boost::process::v2::environment::value>
-      custom_env = {
-          {"RANDOM_SEED", "10"},
-          {"WIDTH", "2"},
-          {"HEIGHT", "2"},
-      };
-  for (auto &&var : boost::process::v2::environment::current()) {
-    custom_env.emplace(var.key(), var.value());
-  }
-  return custom_env;
+boost::process::environment GetCustomEnv(std::int32_t seed, std::int32_t height, std::int32_t width) {
+    boost::process::environment env = boost::this_process::environment();
+    env["RANDOM_SEED"] = std::to_string(seed);
+    env["HEIGHT"] = std::to_string(height);
+    env["WIDTH"] = std::to_string(width);
+    return env;
 }
 
 class MATadvanced12iq {
@@ -76,24 +61,27 @@ public:
         // TODO: delete copy constructors
         ~MATadvanced12iq();
         auto Contains(const std::string_view s) -> bool;
-private:
-        boost::process::v2::popen mat_process_;
+public:
+        boost::process::child mat_process_;
+        boost::process::ipstream mat_out_;
+        boost::process::opstream mat_in_;
 };
 
 MATadvanced12iq::MATadvanced12iq(std::int32_t seed, std::int32_t height,
                                  std::int32_t width)
-    : mat_process_(boost::asio::system_executor{},
-                   boost::process::v2::environment::find_executable("python"),
-                   {"mat/advanced12iq/main.py"},
-                   GetCustomEnv(seed, height, width)) {}
+    : mat_in_(), mat_out_(), mat_process_() {
+  mat_process_ = boost::process::child(
+      "python mat/advanced12iq/main.py", boost::process::std_out > mat_out_,
+      boost::process::std_in < mat_in_, GetCustomEnv(seed, height, width));
+}
 
 MATadvanced12iq::~MATadvanced12iq() {
-    boost::asio::write(mat_process_, boost::asio::buffer("end\n"));
+    mat_in_ << "end" << std::endl;
     mat_process_.wait();
 }
 
 auto MATadvanced12iq::Contains(const std::string_view s) -> bool {
-  return QueryContains(mat_process_, s);
+  return QueryContains(mat_out_, mat_in_, s);
 }
 
 } // namespace learner
@@ -116,4 +104,3 @@ TEST(LearnerTest, GetMinPrefixInLang) {
 
     ASSERT_EQ(got, "EEN"s);
 }
-
