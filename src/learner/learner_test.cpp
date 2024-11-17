@@ -152,7 +152,6 @@ auto GetStepsToLhsBorder(
 
       current_path.push_back(LeftOf(LeftOf(left_step)));
       if (!lang.Contains(current_path)) {
-          exit_suffixes.push_back(current_path.substr(path_to_exit.size()));
           return steps_count;
       }
 
@@ -302,5 +301,22 @@ TEST(GetOtherExitsSuffixesTest, TwoExitsAtCorner) {
     auto got = learner::GetOtherExitsSuffixes(mat, "ESE"sv, height, width);
 
     std::vector<std::string> expected{"SWN", "SWWWNE"};
+    ASSERT_EQ(got, expected);
+}
+
+TEST(GetOtherExitsSuffixesTest, ManyExits) {
+    auto seed = 12345;
+    auto width = 2;
+    auto height = 2;
+    // NOTE:
+    //
+    //      _
+    //        |
+    //
+    auto mat = learner::MATadvanced12iq(seed, width, height);
+
+    auto got = learner::GetOtherExitsSuffixes(mat, "EN"sv, height, width);
+
+    std::vector<std::string> expected{"WS", "ESW", "ESSSWN", "ESSSWWN", "WWSE", "WWSSE"};
     ASSERT_EQ(got, expected);
 }
