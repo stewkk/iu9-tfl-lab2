@@ -9,6 +9,7 @@
 #include <learner/mat_language.hpp>
 #include <learner/min_prefix.hpp>
 #include <learner/exits.hpp>
+#include <learner/labirinth.hpp>
 
 namespace learner {
 
@@ -33,25 +34,6 @@ auto IsSameExit(Language auto &lang, const std::string &prefix,
     return !lang.Contains(ss.str().substr(0, ss.str().size() - 1));
   }
 
-  return true;
-}
-
-class Labirinth {
-public:
-  using Position = std::pair<std::int32_t, std::int32_t>;
-  using Direction = char;
-
-  Labirinth(std::int32_t height, std::int32_t width);
-
-  auto AddWall(Position from, Direction to) -> void;
-  auto IsWall(Position from, Direction to) -> std::optional<bool>;
-};
-
-Labirinth::Labirinth(std::int32_t height, std::int32_t width) {}
-
-auto Labirinth::AddWall(Position from, Direction to) -> void {}
-
-auto Labirinth::IsWall(Position from, Direction to) -> std::optional<bool> {
   return true;
 }
 
@@ -157,7 +139,7 @@ TEST(TODO, TODO) {
     // NOTE: example path from MAT: "NNSEWNESSNN"sv
 }
 
-TEST(LabirinthTest, Create) {
+TEST(LabirinthTest, IsWall) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
@@ -166,4 +148,26 @@ TEST(LabirinthTest, Create) {
   auto got = l.IsWall(learner::Labirinth::Position{0, 1}, 'S');
 
   ASSERT_EQ(got, true);
+}
+
+TEST(LabirinthTest, GetWalls) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  l.AddWall(learner::Labirinth::Position{0, 1}, 'S');
+  l.AddWall(learner::Labirinth::Position{1, 2}, 'E');
+  l.AddWall(learner::Labirinth::Position{1, 2}, 'S');
+  l.AddWall(learner::Labirinth::Position{3, 2}, 'N');
+  using Position = learner::Labirinth::Position;
+  using Direction = learner::Labirinth::Direction;
+  std::vector<std::pair<Position, Direction>> expected = {
+      {{0, 1}, 'S'},
+      {{1, 2}, 'E'},
+      {{1, 2}, 'S'},
+      {{2, 2}, 'S'},
+  };
+
+  auto got = l.GetWalls();
+
+  ASSERT_EQ(got, expected);
 }
