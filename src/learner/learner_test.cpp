@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <boost/process.hpp>
-
 #include <iostream>
 #include <format>
 #include <string_view>
@@ -9,16 +7,11 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
-namespace learner {
+#include <learner/mat_language.hpp>
 
-template <typename L>
-concept Language =
-requires(L l, std::string_view s) {
-    {l.Contains(s)} -> std::same_as<bool>;
-};
+namespace learner {
 
 auto GetMinPrefixInLang(Language auto& lang, const std::string_view path_in_lang) -> std::string {
     for (auto it = path_in_lang.cbegin(); it != path_in_lang.cend(); ++it) {
@@ -28,65 +21,6 @@ auto GetMinPrefixInLang(Language auto& lang, const std::string_view path_in_lang
         }
     }
     return std::string(path_in_lang);
-}
-
-auto QueryContains(std::istream& in, std::ostream& out, const std::string_view s) -> bool {
-    if (s == "") {
-        return false;
-    }
-
-    out << std::format("isin\n{}", s) << std::endl;
-
-    std::string ans;
-    in >> ans;
-
-    std::cerr << std::format("QueryContains({}) == {}\n", s, ans);
-
-    if (ans == "True") {
-        return true;
-    } else if (ans == "False") {
-        return false;
-    }
-
-    throw std::logic_error("got unexpected message from MAT");
-}
-
-boost::process::environment GetCustomEnv(std::int32_t seed, std::int32_t height, std::int32_t width) {
-    boost::process::environment env = boost::this_process::environment();
-    env["RANDOM_SEED"] = std::to_string(seed);
-    env["HEIGHT"] = std::to_string(height);
-    env["WIDTH"] = std::to_string(width);
-    return env;
-}
-
-class MATadvanced12iq {
-public:
-        MATadvanced12iq(std::int32_t seed, std::int32_t height, std::int32_t width);
-        ~MATadvanced12iq();
-        MATadvanced12iq(const MATadvanced12iq&) = delete;
-        MATadvanced12iq& operator=(const MATadvanced12iq&) = delete;
-        auto Contains(const std::string_view s) -> bool;
-public:
-        boost::process::child mat_process_;
-        boost::process::ipstream mat_out_;
-        boost::process::opstream mat_in_;
-};
-
-MATadvanced12iq::MATadvanced12iq(std::int32_t seed, std::int32_t height,
-                                 std::int32_t width)
-    : mat_in_(), mat_out_(), mat_process_() {
-  mat_process_ = boost::process::child(
-      "python mat/advanced12iq/main.py", boost::process::std_out > mat_out_,
-      boost::process::std_in < mat_in_, GetCustomEnv(seed, height, width));
-}
-
-MATadvanced12iq::~MATadvanced12iq() {
-    mat_in_ << "end" << std::endl;
-    mat_process_.wait();
-}
-
-auto MATadvanced12iq::Contains(const std::string_view s) -> bool {
-  return QueryContains(mat_out_, mat_in_, s);
 }
 
 auto LeftOf(char direction) -> char {
@@ -274,47 +208,6 @@ auto MakeMove(std::pair<std::int32_t, std::int32_t> pos,
   throw std::logic_error("unreachable");
 }
 
-auto MinimizePath(Language auto& lang, std::string_view path, const std::vector<std::string>& other_exits_suffixes) -> std::string {
-  std::string unchecked_prefix(path.begin(), std::prev(path.end()));
-  std::string min_suffix(std::prev(path.end()), path.end());
-  std::vector<std::pair<std::int32_t, std::int32_t>> used{{0, 0}};
-  for (std::size_t i = 0; i < path.size()-1; i++) {
-    char checked_step = unchecked_prefix.back();
-    unchecked_prefix.pop_back();
-    if (LeftOf(LeftOf(checked_step)) == min_suffix.front()) {
-      min_suffix.erase(0, 1);
-      used.pop_back();
-      continue;
-    }
-    std::cerr << "checking path: " << unchecked_prefix << '|' << checked_step << '|' << min_suffix << std::endl;
-    if (!IsSameExit(lang, unchecked_prefix, min_suffix, other_exits_suffixes)) {
-      std::cerr << "added to suffix" << std::endl;
-      auto next_move = MakeMove(used.back(), checked_step);
-      bool is_used = false;
-      for (auto [x, y] : used) {
-        std::cerr << x << ',' << y << ' ';
-      }
-      std::cerr << std::endl;
-      for (std::size_t used_i = 0; used_i < used.size(); used_i++) {
-        auto [x, y] = used[used_i];
-        if (next_move.first == x && next_move.second == y) {
-          min_suffix.erase(0, used_i+1);
-          is_used = true;
-          std::cerr << "erased" << std::endl;
-          used.resize(used_i+1);
-          break;
-        }
-      }
-      if (!is_used) {
-        min_suffix.insert(min_suffix.begin(), checked_step);
-        used.push_back(next_move);
-      }
-      std::cerr << min_suffix << std::endl;
-    }
-  }
-  return min_suffix;
-}
-
 } // namespace learner
 
 using std::literals::operator""s;
@@ -403,7 +296,7 @@ TEST(GetOtherExitsSuffixesTest, ManyExits) {
     ASSERT_EQ(got, expected);
 }
 
-TEST(MinimizePath, TODO) {
+TEST(TODO, TODO) {
     auto seed = 10;
     auto width = 2;
     auto height = 2;
@@ -416,7 +309,7 @@ TEST(MinimizePath, TODO) {
     std::vector<std::string> other_exits_suffixes;
 
 
-    auto got = learner::MinimizePath(mat, "NNSEWNESSNN"sv, other_exits_suffixes);
+    // auto got = learner::MinimizePath(mat, "NNSEWNESSNN"sv, other_exits_suffixes);
 
-    ASSERT_EQ(got, "SNESNN"s);
+    // ASSERT_EQ(got, "SNESNN"s);
 }

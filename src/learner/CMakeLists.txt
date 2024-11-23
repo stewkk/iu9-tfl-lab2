@@ -1,4 +1,6 @@
-add_library(liblearner learner.cpp)
+include(FetchBoost)
+
+add_library(liblearner learner.cpp mat_language.cpp)
 add_library(stewkk::liblearner ALIAS liblearner)
 target_compile_features(liblearner PUBLIC cxx_std_20)
 set_target_properties(liblearner PROPERTIES
@@ -14,6 +16,7 @@ target_include_directories(
 target_include_directories(
   liblearner PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
+target_link_libraries(liblearner PRIVATE Boost::process)
 target_compile_options(liblearner PRIVATE ${BASE_COMPILE_FLAGS})
 
 add_executable(learner main.cpp)
