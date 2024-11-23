@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 namespace learner {
 
@@ -233,6 +235,86 @@ auto GetOtherExitsSuffixes(Language auto& lang,
   return exit_suffixes;
 }
 
+auto IsSameExit(Language auto &lang, const std::string &prefix,
+                const std::string &suffix,
+                const std::vector<std::string> &other_exits_suffixes) -> bool {
+  std::ostringstream ss;
+  ss << prefix << suffix;
+  if (!lang.Contains(ss.str())) {
+    return false;
+  }
+
+  for (const auto &other_exit_suffix : other_exits_suffixes) {
+    std::ostringstream tmp;
+    tmp << ss.str() << other_exit_suffix;
+    if (!lang.Contains(tmp.str())) {
+      return false;
+    }
+  }
+
+  if (other_exits_suffixes.empty()) {
+    return !lang.Contains(ss.str().substr(0, ss.str().size() - 1));
+  }
+
+  return true;
+}
+
+auto MakeMove(std::pair<std::int32_t, std::int32_t> pos,
+              char move) -> std::pair<std::int32_t, std::int32_t> {
+  switch (move) {
+  case 'N':
+    return {pos.first, pos.second - 1};
+  case 'S':
+    return {pos.first, pos.second + 1};
+  case 'W':
+    return {pos.first - 1, pos.second};
+  case 'E':
+    return {pos.first + 1, pos.second};
+  }
+  throw std::logic_error("unreachable");
+}
+
+auto MinimizePath(Language auto& lang, std::string_view path, const std::vector<std::string>& other_exits_suffixes) -> std::string {
+  std::string unchecked_prefix(path.begin(), std::prev(path.end()));
+  std::string min_suffix(std::prev(path.end()), path.end());
+  std::vector<std::pair<std::int32_t, std::int32_t>> used{{0, 0}};
+  for (std::size_t i = 0; i < path.size()-1; i++) {
+    char checked_step = unchecked_prefix.back();
+    unchecked_prefix.pop_back();
+    if (LeftOf(LeftOf(checked_step)) == min_suffix.front()) {
+      min_suffix.erase(0, 1);
+      used.pop_back();
+      continue;
+    }
+    std::cerr << "checking path: " << unchecked_prefix << '|' << checked_step << '|' << min_suffix << std::endl;
+    if (!IsSameExit(lang, unchecked_prefix, min_suffix, other_exits_suffixes)) {
+      std::cerr << "added to suffix" << std::endl;
+      auto next_move = MakeMove(used.back(), checked_step);
+      bool is_used = false;
+      for (auto [x, y] : used) {
+        std::cerr << x << ',' << y << ' ';
+      }
+      std::cerr << std::endl;
+      for (std::size_t used_i = 0; used_i < used.size(); used_i++) {
+        auto [x, y] = used[used_i];
+        if (next_move.first == x && next_move.second == y) {
+          min_suffix.erase(0, used_i+1);
+          is_used = true;
+          std::cerr << "erased" << std::endl;
+          used.resize(used_i+1);
+          break;
+        }
+      }
+      if (!is_used) {
+        min_suffix.insert(min_suffix.begin(), checked_step);
+        used.push_back(next_move);
+      }
+      std::cerr << min_suffix << std::endl;
+    }
+  }
+  return min_suffix;
+}
+
 } // namespace learner
 
 using std::literals::operator""s;
@@ -247,7 +329,7 @@ TEST(GetMinPrefixInLangTest, ReturnsMinPrefix) {
     //     |   |
     //     | | |
     //      ‾ ‾
-    auto mat = learner::MATadvanced12iq(seed, width, height);
+    auto mat = learner::MATadvanced12iq(seed, height, width);
 
     auto got = learner::GetMinPrefixInLang(mat, "EENWS"sv);
 
@@ -263,7 +345,7 @@ TEST(GetOtherExitsSuffixesTest, NoOtherExits) {
     //     |   |
     //     | | |
     //      ‾ ‾
-    auto mat = learner::MATadvanced12iq(seed, width, height);
+    auto mat = learner::MATadvanced12iq(seed, height, width);
 
     auto suffixes = learner::GetOtherExitsSuffixes(mat, "EEN"sv, height, width);
 
@@ -279,7 +361,7 @@ TEST(GetOtherExitsSuffixesTest, TwoExits) {
     //     |   |
     //       | |
     //      ‾ ‾
-    auto mat = learner::MATadvanced12iq(seed, width, height);
+    auto mat = learner::MATadvanced12iq(seed, height, width);
 
     auto got = learner::GetOtherExitsSuffixes(mat, "WSSW"sv, height, width);
 
@@ -296,7 +378,7 @@ TEST(GetOtherExitsSuffixesTest, TwoExitsAtCorner) {
     //     |   |
     //       |
     //      ‾
-    auto mat = learner::MATadvanced12iq(seed, width, height);
+    auto mat = learner::MATadvanced12iq(seed, height, width);
 
     auto got = learner::GetOtherExitsSuffixes(mat, "ESE"sv, height, width);
 
@@ -313,10 +395,28 @@ TEST(GetOtherExitsSuffixesTest, ManyExits) {
     //      _
     //        |
     //
-    auto mat = learner::MATadvanced12iq(seed, width, height);
+    auto mat = learner::MATadvanced12iq(seed, height, width);
 
     auto got = learner::GetOtherExitsSuffixes(mat, "EN"sv, height, width);
 
     std::vector<std::string> expected{"WS", "ESW", "ESSSWN", "ESSSWWN", "WWSE", "WWSSE"};
     ASSERT_EQ(got, expected);
+}
+
+TEST(MinimizePath, TODO) {
+    auto seed = 10;
+    auto width = 2;
+    auto height = 2;
+    // NOTE:
+    //      _
+    //     |   |
+    //     | | |
+    //      ‾ ‾
+    auto mat = learner::MATadvanced12iq(seed, height, width);
+    std::vector<std::string> other_exits_suffixes;
+
+
+    auto got = learner::MinimizePath(mat, "NNSEWNESSNN"sv, other_exits_suffixes);
+
+    ASSERT_EQ(got, "SNESNN"s);
 }
