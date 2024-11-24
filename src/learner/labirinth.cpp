@@ -63,4 +63,18 @@ auto Labirinth::GetWalls() -> std::vector<std::pair<Position, Direction>> {
   return res;
 }
 
+auto Labirinth::GetExitPosition(Direction exit_direction, std::int32_t steps_to_lhs_border) -> Position {
+  switch (exit_direction) {
+    case 'N':
+      return Position{0, steps_to_lhs_border};
+    case 'S':
+      return Position{walls_.size()-1, walls_.front().size()-steps_to_lhs_border-1};
+    case 'W':
+      return Position{walls_.size()-1-steps_to_lhs_border, 0};
+    case 'E':
+      return Position{steps_to_lhs_border, walls_.front().size()-1};
+  }
+  throw std::logic_error{"unreachable"};
+}
+
 }  // namespace learner

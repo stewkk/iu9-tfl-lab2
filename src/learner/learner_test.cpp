@@ -171,3 +171,55 @@ TEST(LabirinthTest, GetWalls) {
 
   ASSERT_EQ(got, expected);
 }
+
+TEST(LabirinthTest, GetExitPosition) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  using Position = learner::Labirinth::Position;
+  using Direction = learner::Labirinth::Direction;
+
+  auto got = l.GetExitPosition(Direction{'N'}, 2);
+
+  auto expected = Position{0, 2};
+  ASSERT_EQ(got, expected);
+}
+
+TEST(LabirinthTest, GetExitPositionFromSouth) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  using Position = learner::Labirinth::Position;
+  using Direction = learner::Labirinth::Direction;
+
+  auto got = l.GetExitPosition(Direction{'S'}, 2);
+
+  auto expected = Position{3, 1};
+  ASSERT_EQ(got, expected);
+}
+
+TEST(LabirinthTest, GetExitPositionFromWest) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  using Position = learner::Labirinth::Position;
+  using Direction = learner::Labirinth::Direction;
+
+  auto got = l.GetExitPosition(Direction{'W'}, 1);
+
+  auto expected = Position{2, 0};
+  ASSERT_EQ(got, expected);
+}
+
+TEST(LabirinthTest, GetExitPositionFromEast) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  using Position = learner::Labirinth::Position;
+  using Direction = learner::Labirinth::Direction;
+
+  auto got = l.GetExitPosition(Direction{'E'}, 2);
+
+  auto expected = Position{2, 3};
+  ASSERT_EQ(got, expected);
+}

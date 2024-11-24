@@ -18,6 +18,7 @@ public:
   auto AddWall(Position from, Direction to) -> void;
   auto IsWall(Position from, Direction to) -> std::optional<bool>;
   auto GetWalls() -> std::vector<std::pair<Position, Direction>>;
+  auto GetExitPosition(Direction exit_direction, std::int32_t steps_to_lhs_border) -> Position;
 
 private:
   using CellWalls = std::array<std::optional<bool>, 2>;
