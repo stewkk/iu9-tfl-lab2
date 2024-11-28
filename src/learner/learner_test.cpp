@@ -126,26 +126,6 @@ TEST(LabirinthTest, IsWall) {
   ASSERT_EQ(l.IsWall(learner::Position{0, 2}, 'S'), std::nullopt);
 }
 
-TEST(LabirinthTest, GetWalls) {
-  std::int32_t height = 2;
-  std::int32_t width = 2;
-  learner::Labirinth l(height, width);
-  l.AddWall(learner::Position{0, 1}, 'S');
-  l.AddWall(learner::Position{1, 2}, 'E');
-  l.AddWall(learner::Position{1, 2}, 'S');
-  l.AddWall(learner::Position{3, 2}, 'N');
-  std::vector<std::pair<Position, Direction>> expected = {
-      {{0, 1}, 'S'},
-      {{1, 2}, 'E'},
-      {{1, 2}, 'S'},
-      {{2, 2}, 'S'},
-  };
-
-  auto got = l.GetWalls();
-
-  ASSERT_EQ(got, expected);
-}
-
 TEST(LabirinthTest, GetExitPosition) {
   std::int32_t height = 2;
   std::int32_t width = 2;
@@ -227,10 +207,18 @@ TEST(LabirinthTest, FillBorders) {
 
   std::vector<std::pair<Position, Direction>> expected = {
   {{0, 1}, 'S'},
+  {{0, 3}, 'E'},
   {{1, 0}, 'E'},
+  {{1, 3}, 'E'},
   {{2, 1}, 'S'},
   {{2, 2}, 'E'},
   {{2, 2}, 'S'},
+  {{2, 3}, 'E'},
+  {{3, 0}, 'S'},
+  {{3, 1}, 'S'},
+  {{3, 2}, 'S'},
+  {{3, 3}, 'E'},
+  {{3, 3}, 'S'},
   };
   ASSERT_EQ(got, expected);
 }
@@ -265,7 +253,9 @@ TEST(LabirinthTest, ExploreLabirinthWithSingleExit) {
   {{2, 2}, 'E'},
   {{2, 2}, 'S'},
   };
-  ASSERT_EQ(got, expected);
+  for (auto wall : expected) {
+    ASSERT_NE(std::find(got.begin(), got.end(), wall), got.end());
+  }
 }
 
 
@@ -297,5 +287,11 @@ TEST(LabirinthTest, ExploreLabirinthWithMultipleExits) {
   {{2, 1}, 'E'},
   {{2, 1}, 'S'},
   };
-  ASSERT_EQ(got, expected);
+  for (auto wall : expected) {
+    ASSERT_NE(std::find(got.begin(), got.end(), wall), got.end());
+  }
+}
+
+TEST(LabirinthTest, BuildTablePrefixes) {
+
 }

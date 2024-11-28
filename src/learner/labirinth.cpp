@@ -9,7 +9,23 @@
 namespace learner {
 
 Labirinth::Labirinth(std::int32_t height, std::int32_t width)
-  : walls_(height+2, std::vector<CellWalls>(width+2)) {}
+  : walls_(height+2, std::vector<CellWalls>(width+2)) {
+  for (std::int32_t i = 0; i < GetWidth()-1; i++) {
+    walls_[0][i][0] = false;
+    walls_[GetHeight()-1][i][0] = false;
+  }
+  for (std::int32_t i = 0; i < GetHeight()-1; i++) {
+    walls_[i][0][1] = false;
+    walls_[i][GetWidth()-1][1] = false;
+  }
+
+  for (std::int32_t i = 0; i < GetHeight(); i++) {
+    walls_[i][GetWidth()-1][0] = true;
+  }
+  for (std::int32_t i = 0; i < GetWidth(); i++) {
+    walls_[GetHeight()-1][i][1] = true;
+  }
+}
 
 
 auto Labirinth::GetHeight() const -> std::int32_t {
@@ -40,6 +56,10 @@ auto Labirinth::get_wall(Position from, Direction to) const -> std::optional<boo
   }
 
   auto [x, y] = from;
+  if (x < 0 || y < 0 || x >= GetHeight() || y >= GetWidth()) {
+    return true;
+  }
+
   if (to == 'E') {
     return walls_[x][y][0];
   }
