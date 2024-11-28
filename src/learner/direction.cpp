@@ -49,4 +49,26 @@ auto SideSizeByExitDirection(char exit_direction, std::int32_t height, std::int3
   throw std::invalid_argument("invalid direction");
 }
 
+auto MakeMove(Position pos,
+              Direction move) -> Position {
+  switch (move) {
+  case 'N':
+    return {pos.first - 1, pos.second};
+  case 'S':
+    return {pos.first + 1, pos.second};
+  case 'W':
+    return {pos.first, pos.second - 1};
+  case 'E':
+    return {pos.first, pos.second + 1};
+  }
+  throw std::logic_error("unreachable");
+}
+
+auto MakeMoves(Position pos, const std::span<const Direction> moves) -> Position {
+    for (auto move : moves) {
+      pos = MakeMove(pos, move);
+    }
+    return pos;
+  }
+
 }  // namespace learner

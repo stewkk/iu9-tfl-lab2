@@ -1,5 +1,7 @@
 #pragma once
 
+// NOTE: можно переписать гораздо проще, но я скорее всего не буду этого делать
+
 #include <cstdint>
 #include <concepts>
 #include <vector>

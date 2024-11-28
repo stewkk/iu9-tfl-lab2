@@ -8,29 +8,19 @@
 
 namespace learner {
 
-namespace {
+Labirinth::Labirinth(std::int32_t height, std::int32_t width)
+  : walls_(height+2, std::vector<CellWalls>(width+2)) {}
 
-auto MakeMove(std::pair<std::int32_t, std::int32_t> pos,
-              char move) -> std::pair<std::int32_t, std::int32_t> {
-  switch (move) {
-  case 'N':
-    return {pos.first - 1, pos.second};
-  case 'S':
-    return {pos.first + 1, pos.second};
-  case 'W':
-    return {pos.first, pos.second - 1};
-  case 'E':
-    return {pos.first, pos.second + 1};
-  }
-  throw std::logic_error("unreachable");
+
+auto Labirinth::GetHeight() const -> std::int32_t {
+  return walls_.size();
 }
 
-}  // namespace
+auto Labirinth::GetWidth() const -> std::int32_t {
+  return walls_.front().size();
+}
 
-Labirinth::Labirinth(std::int32_t height, std::int32_t width)
-    : walls_(height+2, std::vector<CellWalls>(width+2)) {}
-
-auto Labirinth::AddWall(Position from, Direction to) -> void {
+auto Labirinth::get_wall(Position from, Direction to) -> std::optional<bool>& {
   if (to == 'N' || to == 'W') {
     from = MakeMove(from, to);
     to = LeftOf(LeftOf(to));
@@ -38,20 +28,40 @@ auto Labirinth::AddWall(Position from, Direction to) -> void {
 
   auto [x, y] = from;
   if (to == 'E') {
-    walls_[x][y][0] = true;
-    return;
+    return walls_[x][y][0];
   }
-  walls_[x][y][1] = true;
+  return walls_[x][y][1];
 }
 
-auto Labirinth::IsWall(Position from, Direction to) -> std::optional<bool> {
-  return true;
+auto Labirinth::get_wall(Position from, Direction to) const -> std::optional<bool> {
+  if (to == 'N' || to == 'W') {
+    from = MakeMove(from, to);
+    to = LeftOf(LeftOf(to));
+  }
+
+  auto [x, y] = from;
+  if (to == 'E') {
+    return walls_[x][y][0];
+  }
+  return walls_[x][y][1];
 }
 
-auto Labirinth::GetWalls() -> std::vector<std::pair<Position, Direction>> {
+auto Labirinth::AddWall(Position from, Direction to) -> void {
+  get_wall(from, to) = true;
+}
+
+auto Labirinth::IsWall(Position from, Direction to) const -> std::optional<bool> {
+  return get_wall(from, to);
+}
+
+auto Labirinth::AddPath(Position from, Direction to) -> void {
+  get_wall(from, to) = false;
+}
+
+auto Labirinth::GetWalls() const -> std::vector<std::pair<Position, Direction>> {
   std::vector<std::pair<Position, Direction>> res;
-  for (std::int32_t i = 0; i < walls_.size(); i++) {
-    for (std::int32_t j = 0; j < walls_.front().size(); j++) {
+  for (std::int32_t i = 0; i < GetHeight(); i++) {
+    for (std::int32_t j = 0; j < GetWidth(); j++) {
       if (walls_[i][j][0].value_or(false)) {
         res.emplace_back(Position{i, j}, 'E');
       }
@@ -63,18 +73,26 @@ auto Labirinth::GetWalls() -> std::vector<std::pair<Position, Direction>> {
   return res;
 }
 
-auto Labirinth::GetExitPosition(Direction exit_direction, std::int32_t steps_to_lhs_border) -> Position {
+auto Labirinth::GetExit(Direction exit_direction, std::int32_t steps_to_lhs_border) const -> Exit {
+  Position pos;
   switch (exit_direction) {
     case 'N':
-      return Position{0, steps_to_lhs_border};
+      pos = Position{0, steps_to_lhs_border};
+      break;
     case 'S':
-      return Position{walls_.size()-1, walls_.front().size()-steps_to_lhs_border-1};
+      pos = Position{GetHeight()-1, GetWidth()-steps_to_lhs_border-1};
+      break;
     case 'W':
-      return Position{walls_.size()-1-steps_to_lhs_border, 0};
+      pos = Position{GetHeight()-1-steps_to_lhs_border, 0};
+      break;
     case 'E':
-      return Position{steps_to_lhs_border, walls_.front().size()-1};
+      pos = Position{steps_to_lhs_border, GetWidth()-1};
+      break;
+    default:
+     throw std::logic_error{"unreachable"};
   }
-  throw std::logic_error{"unreachable"};
+
+  return Exit{.pos = pos, .direction = exit_direction};
 }
 
 }  // namespace learner

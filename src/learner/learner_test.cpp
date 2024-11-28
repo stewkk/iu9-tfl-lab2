@@ -10,6 +10,7 @@
 #include <learner/min_prefix.hpp>
 #include <learner/exits.hpp>
 #include <learner/labirinth.hpp>
+#include <learner/labirinth_builder.hpp>
 
 namespace learner {
 
@@ -41,6 +42,9 @@ auto IsSameExit(Language auto &lang, const std::string &prefix,
 
 using std::literals::operator""s;
 using std::literals::operator""sv;
+
+using Direction = learner::Direction;
+using Position = learner::Position;
 
 TEST(GetMinPrefixInLangTest, ReturnsMinPrefix) {
     auto seed = 10;
@@ -144,22 +148,20 @@ TEST(LabirinthTest, IsWall) {
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
 
-  l.AddWall(learner::Labirinth::Position{0, 1}, 'S');
-  auto got = l.IsWall(learner::Labirinth::Position{0, 1}, 'S');
+  l.AddWall(learner::Position{0, 1}, 'S');
 
-  ASSERT_EQ(got, true);
+  ASSERT_EQ(l.IsWall(learner::Position{0, 1}, 'S'), true);
+  ASSERT_EQ(l.IsWall(learner::Position{0, 2}, 'S'), std::nullopt);
 }
 
 TEST(LabirinthTest, GetWalls) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
-  l.AddWall(learner::Labirinth::Position{0, 1}, 'S');
-  l.AddWall(learner::Labirinth::Position{1, 2}, 'E');
-  l.AddWall(learner::Labirinth::Position{1, 2}, 'S');
-  l.AddWall(learner::Labirinth::Position{3, 2}, 'N');
-  using Position = learner::Labirinth::Position;
-  using Direction = learner::Labirinth::Direction;
+  l.AddWall(learner::Position{0, 1}, 'S');
+  l.AddWall(learner::Position{1, 2}, 'E');
+  l.AddWall(learner::Position{1, 2}, 'S');
+  l.AddWall(learner::Position{3, 2}, 'N');
   std::vector<std::pair<Position, Direction>> expected = {
       {{0, 1}, 'S'},
       {{1, 2}, 'E'},
@@ -176,50 +178,103 @@ TEST(LabirinthTest, GetExitPosition) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
-  using Position = learner::Labirinth::Position;
-  using Direction = learner::Labirinth::Direction;
 
-  auto got = l.GetExitPosition(Direction{'N'}, 2);
+  auto got = l.GetExit(Direction{'N'}, 2);
 
   auto expected = Position{0, 2};
-  ASSERT_EQ(got, expected);
+  ASSERT_EQ(got.pos, expected);
 }
 
 TEST(LabirinthTest, GetExitPositionFromSouth) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
-  using Position = learner::Labirinth::Position;
-  using Direction = learner::Labirinth::Direction;
 
-  auto got = l.GetExitPosition(Direction{'S'}, 2);
+  auto got = l.GetExit(Direction{'S'}, 2);
 
   auto expected = Position{3, 1};
-  ASSERT_EQ(got, expected);
+  ASSERT_EQ(got.pos, expected);
 }
 
 TEST(LabirinthTest, GetExitPositionFromWest) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
-  using Position = learner::Labirinth::Position;
-  using Direction = learner::Labirinth::Direction;
 
-  auto got = l.GetExitPosition(Direction{'W'}, 1);
+  auto got = l.GetExit(Direction{'W'}, 1);
 
   auto expected = Position{2, 0};
-  ASSERT_EQ(got, expected);
+  ASSERT_EQ(got.pos, expected);
 }
 
 TEST(LabirinthTest, GetExitPositionFromEast) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
-  using Position = learner::Labirinth::Position;
-  using Direction = learner::Labirinth::Direction;
 
-  auto got = l.GetExitPosition(Direction{'E'}, 2);
+  auto got = l.GetExit(Direction{'E'}, 2);
 
   auto expected = Position{2, 3};
+  ASSERT_EQ(got.pos, expected);
+}
+
+TEST(LabirinthTest, GetOtherExitPosition) {
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::string suffix = "WWSSE";
+
+  auto got = learner::GetOtherExit(exit, suffix);
+
+  auto expected = learner::Exit{.pos = {2, 0}, .direction='W'};
   ASSERT_EQ(got, expected);
+}
+
+TEST(LabitinthTest, SetExits) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::vector<std::string> other_exits_suffixes{"WWSSE", "ESW"};
+
+  SetExits(l, exit, other_exits_suffixes);
+
+  ASSERT_EQ(l.IsWall({0, 2}, 'S'), false);
+  ASSERT_EQ(l.IsWall({1, 3}, 'W'), false);
+  ASSERT_EQ(l.IsWall({2, 0}, 'E'), false);
+}
+
+TEST(LabirinthTest, FillBorders) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::vector<std::string> other_exits_suffixes{"WWSSE", "ESW"};
+  SetExits(l, exit, other_exits_suffixes);
+  FillBorders(l);
+
+  auto got = l.GetWalls();
+
+  std::vector<std::pair<Position, Direction>> expected = {
+  {{0, 1}, 'S'},
+  {{1, 0}, 'E'},
+  {{2, 1}, 'S'},
+  {{2, 2}, 'E'},
+  {{2, 2}, 'S'},
+  };
+  ASSERT_EQ(got, expected);
+}
+
+TEST(TODO, FindLabirinthWalls) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+
+  // NOTE: path to exit returned from MAT as counterexample
+  std::string path = "EW";
+  // NOTE: no other exits
+  std::vector<std::string> other_exits_suffixes{};
+  std::int32_t steps_to_lhs_border = 2;
+
+  // TODO: set labirinth border walls and exits
+  // TODO: run search
+
 }

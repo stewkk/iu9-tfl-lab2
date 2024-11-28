@@ -1,6 +1,6 @@
 include(FetchBoost)
 
-add_library(liblearner learner.cpp mat_advanced12iq.cpp direction.cpp labirinth.cpp)
+add_library(liblearner learner.cpp mat_advanced12iq.cpp direction.cpp labirinth.cpp labirinth_builder.cpp)
 add_library(stewkk::liblearner ALIAS liblearner)
 target_compile_features(liblearner PUBLIC cxx_std_20)
 set_target_properties(liblearner PROPERTIES
