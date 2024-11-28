@@ -12,34 +12,6 @@
 #include <learner/labirinth.hpp>
 #include <learner/labirinth_builder.hpp>
 
-namespace learner {
-
-auto IsSameExit(Language auto &lang, const std::string &prefix,
-                const std::string &suffix,
-                const std::vector<std::string> &other_exits_suffixes) -> bool {
-  std::ostringstream ss;
-  ss << prefix << suffix;
-  if (!lang.Contains(ss.str())) {
-    return false;
-  }
-
-  for (const auto &other_exit_suffix : other_exits_suffixes) {
-    std::ostringstream tmp;
-    tmp << ss.str() << other_exit_suffix;
-    if (!lang.Contains(tmp.str())) {
-      return false;
-    }
-  }
-
-  if (other_exits_suffixes.empty()) {
-    return !lang.Contains(ss.str().substr(0, ss.str().size() - 1));
-  }
-
-  return true;
-}
-
-} // namespace learner
-
 using std::literals::operator""s;
 using std::literals::operator""sv;
 
@@ -263,18 +235,67 @@ TEST(LabirinthTest, FillBorders) {
   ASSERT_EQ(got, expected);
 }
 
-TEST(TODO, FindLabirinthWalls) {
+TEST(LabirinthTest, ExploreLabirinthWithSingleExit) {
   std::int32_t height = 2;
   std::int32_t width = 2;
   learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::vector<std::string> other_exits_suffixes;
+  SetExits(l, exit, other_exits_suffixes);
+  FillBorders(l);
 
-  // NOTE: path to exit returned from MAT as counterexample
-  std::string path = "EW";
-  // NOTE: no other exits
-  std::vector<std::string> other_exits_suffixes{};
-  std::int32_t steps_to_lhs_border = 2;
+  auto seed = 10;
+  // NOTE:
+  //      _
+  //     |   |
+  //     | | |
+  //      ‾ ‾
+  auto mat = learner::MATadvanced12iq(seed, height, width);
 
-  // TODO: set labirinth border walls and exits
-  // TODO: run search
+  ExploreLabirinth(l, mat, exit, "EN", other_exits_suffixes);
+  auto got = l.GetWalls();
 
+  std::vector<std::pair<Position, Direction>> expected = {
+  {{0, 1}, 'S'},
+  {{1, 0}, 'E'},
+  {{1, 2}, 'E'},
+  {{2, 0}, 'E'},
+  {{2, 1}, 'E'},
+  {{2, 1}, 'S'},
+  {{2, 2}, 'E'},
+  {{2, 2}, 'S'},
+  };
+  ASSERT_EQ(got, expected);
+}
+
+
+TEST(LabirinthTest, ExploreLabirinthWithMultipleExits) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {3, 2}, .direction = 'S'};
+  std::vector<std::string> other_exits_suffixes{"ENW", "WWNE"};
+  SetExits(l, exit, other_exits_suffixes);
+  FillBorders(l);
+
+  auto seed = 991;
+  // NOTE:
+  //      ___
+  //     |   |
+  //       |
+  //      ‾
+  auto mat = learner::MATadvanced12iq(seed, height, width);
+
+  ExploreLabirinth(l, mat, exit, "ESS", other_exits_suffixes);
+  auto got = l.GetWalls();
+
+  std::vector<std::pair<Position, Direction>> expected = {
+  {{0, 1}, 'S'},
+  {{0, 2}, 'S'},
+  {{1, 0}, 'E'},
+  {{1, 2}, 'E'},
+  {{2, 1}, 'E'},
+  {{2, 1}, 'S'},
+  };
+  ASSERT_EQ(got, expected);
 }
