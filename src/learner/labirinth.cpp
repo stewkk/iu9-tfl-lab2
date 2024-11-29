@@ -115,4 +115,18 @@ auto Labirinth::GetExit(Direction exit_direction, std::int32_t steps_to_lhs_bord
   return Exit{.pos = pos, .direction = exit_direction};
 }
 
+
+auto Labirinth::IsIn(Position pos) const -> bool {
+  auto [x, y] = pos;
+
+  if (x == 0 || y == 0) {
+    return false;
+  }
+  if (x == GetHeight()-1 || y == GetWidth()-1) {
+    return false;
+  }
+
+  return true;
+}
+
 }  // namespace learner

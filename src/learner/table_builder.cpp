@@ -4,6 +4,8 @@
 #include <utility>
 #include <cassert>
 
+#include <learner/labirinth_builder.hpp>
+
 namespace learner {
 
 auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
@@ -93,7 +95,28 @@ auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<s
 }
 
 auto BuildOuterSuffixes(Table& table, const Labirinth& labirinth) -> void {
+    for (std::int32_t x = 0; x < labirinth.GetHeight(); x++) {
+        auto suffixes = GetExitsSuffixes(Position{x, labirinth.GetWidth()-1}, labirinth);
+        for (const auto& suffix : suffixes) {
+            table.AddSuffix(suffix);
+        }
 
+        suffixes = GetExitsSuffixes(Position{x, 0}, labirinth);
+        for (const auto& suffix : suffixes) {
+            table.AddSuffix(suffix);
+        }
+    }
+    for (std::int32_t y = 1; y < labirinth.GetWidth()-1; y++) {
+        auto suffixes = GetExitsSuffixes(Position{labirinth.GetHeight()-1, y}, labirinth);
+        for (const auto& suffix : suffixes) {
+            table.AddSuffix(suffix);
+        }
+
+        suffixes = GetExitsSuffixes(Position{0, y}, labirinth);
+        for (const auto& suffix : suffixes) {
+            table.AddSuffix(suffix);
+        }
+    }
 }
 
 }  // namespace learner

@@ -28,6 +28,7 @@ public:
   auto AddPath(Position from, Direction to) -> void;
   auto GetWalls() const -> std::vector<std::pair<Position, Direction>>;
   auto GetExit(Direction exit_direction, std::int32_t steps_to_lhs_border) const -> Exit;
+  auto IsIn(Position pos) const -> bool;
 
 private:
   auto get_wall(Position from, Direction to) -> std::optional<bool>&;

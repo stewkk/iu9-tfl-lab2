@@ -75,7 +75,7 @@ auto FindExits(Language auto &lang, std::int32_t steps_count,
 
 auto GetOtherExitsSuffixes(Language auto& lang,
                            const std::string_view path_to_exit, std::int32_t height,
-                           std::int32_t width) -> std::vector<std::string> {
+                           std::int32_t width) -> std::pair<std::vector<std::string>, std::int32_t> {
   if (path_to_exit.empty()) {
     throw std::invalid_argument("path to exit cannot be empty");
   }
@@ -115,7 +115,7 @@ auto GetOtherExitsSuffixes(Language auto& lang,
   current_prefix.push_back(LeftOf(LeftOf(last_step)));
   FindExits(lang, SideSizeByExitDirection(LeftOf(last_step), height, width), current_prefix, path_to_exit.size(), exit_suffixes, LeftOf);
 
-  return exit_suffixes;
+  return {exit_suffixes, steps_to_lhs};
 }
 
 }  // namespace learner

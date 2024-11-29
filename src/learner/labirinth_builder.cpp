@@ -1,6 +1,9 @@
 #include <learner/labirinth_builder.hpp>
 
 #include <span>
+#include <queue>
+#include <utility>
+#include <cassert>
 
 namespace learner {
 
@@ -40,6 +43,40 @@ auto FillBorders(Labirinth& l) -> void {
             l.AddWall({i, l.GetHeight()-1}, 'W');
         }
     }
+}
+
+auto GetExitsSuffixes(Position from, const Labirinth& labirinth) -> std::vector<std::string> {
+    std::vector<std::string> res;
+    std::queue<std::pair<Position, std::string>> q;
+    std::vector<std::vector<char>> used(labirinth.GetHeight(), std::vector<char>(labirinth.GetWidth(), false));
+    q.push({from, ""});
+    used[from.first][from.second] = true;
+    while (!q.empty()) {
+        auto [pos, path] = q.front();
+        q.pop();
+
+        for (auto direction : {'N', 'S', 'W', 'E'}) {
+            auto is_wall = labirinth.IsWall(pos, direction);
+            assert(is_wall.has_value());
+            if (is_wall.value()) {
+                continue;
+            }
+
+            auto next = MakeMove(pos, direction);
+            if (used[next.first][next.second]) {
+                continue;
+            }
+            used[next.first][next.second] = true;
+
+            if (labirinth.IsIn(next)) {
+                res.push_back(path+direction);
+                continue;
+            }
+
+            q.push({next, path+direction});
+        }
+    }
+    return res;
 }
 
 }  // namespace learner

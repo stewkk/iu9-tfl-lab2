@@ -85,4 +85,6 @@ auto ExploreLabirinth(Labirinth& labirinth, Language auto& lang, Exit exit,
   }
 }
 
+auto GetExitsSuffixes(Position from, const Labirinth& labirinth) -> std::vector<std::string>;
+
 }  // namespace learner

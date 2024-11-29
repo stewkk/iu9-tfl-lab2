@@ -47,7 +47,7 @@ TEST(GetOtherExitsSuffixesTest, NoOtherExits) {
     //      ‾ ‾
     auto mat = learner::MATadvanced12iq(seed, height, width);
 
-    auto suffixes = learner::GetOtherExitsSuffixes(mat, "EEN"sv, height, width);
+    auto [suffixes, _] = learner::GetOtherExitsSuffixes(mat, "EEN"sv, height, width);
 
     ASSERT_EQ(suffixes, std::vector<std::string>{});
 }
@@ -63,7 +63,7 @@ TEST(GetOtherExitsSuffixesTest, TwoExits) {
     //      ‾ ‾
     auto mat = learner::MATadvanced12iq(seed, height, width);
 
-    auto got = learner::GetOtherExitsSuffixes(mat, "WSSW"sv, height, width);
+    auto [got, _] = learner::GetOtherExitsSuffixes(mat, "WSSW"sv, height, width);
 
     std::vector<std::string> expected{"NNES"};
     ASSERT_EQ(got, expected);
@@ -80,7 +80,7 @@ TEST(GetOtherExitsSuffixesTest, TwoExitsAtCorner) {
     //      ‾
     auto mat = learner::MATadvanced12iq(seed, height, width);
 
-    auto got = learner::GetOtherExitsSuffixes(mat, "ESE"sv, height, width);
+    auto [got, _] = learner::GetOtherExitsSuffixes(mat, "ESE"sv, height, width);
 
     std::vector<std::string> expected{"SWN", "SWWWNE"};
     ASSERT_EQ(got, expected);
@@ -97,7 +97,7 @@ TEST(GetOtherExitsSuffixesTest, ManyExits) {
     //
     auto mat = learner::MATadvanced12iq(seed, height, width);
 
-    auto got = learner::GetOtherExitsSuffixes(mat, "EN"sv, height, width);
+    auto [got, _] = learner::GetOtherExitsSuffixes(mat, "EN"sv, height, width);
 
     std::vector<std::string> expected{"WS", "ESW", "ESSSWN", "ESSSWWN", "WWSE", "WWSSE"};
     ASSERT_EQ(got, expected);
@@ -383,6 +383,6 @@ TEST(TableTest, BuildOuterSuffixes) {
   learner::BuildOuterSuffixes(t, l);
   auto got = t.GetSuffixes();
 
-  std::vector<std::string> expected{ "N", "NN", "EN", "NEN" };
+  std::vector<std::string> expected{ "WS", "EES", "NWS", "NEES", "NNWS", "NNEES", "NNNWS", "NNNEES", "WNNNEES", "ES", "ENNNWS", "S" };
   ASSERT_EQ(got, expected);
 }
