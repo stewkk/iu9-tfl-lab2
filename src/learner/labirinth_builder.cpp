@@ -39,8 +39,8 @@ auto FillBorders(Labirinth& l) -> void {
         if (!l.IsWall({i, 0}, 'E').has_value()) {
             l.AddWall({i, 0}, 'E');
         }
-        if (!l.IsWall({i, l.GetHeight()-1}, 'W').has_value()) {
-            l.AddWall({i, l.GetHeight()-1}, 'W');
+        if (!l.IsWall({i, l.GetWidth()-1}, 'W').has_value()) {
+            l.AddWall({i, l.GetWidth()-1}, 'W');
         }
     }
 }

@@ -24,7 +24,8 @@ auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int32_t seed) -
 
     auto path_to_exit = counterexample.value();
 
-    auto min_prefix = GetMinPrefixInLang(mat, path_to_exit);
+    path_to_exit = GetMinPrefixInLang(mat, path_to_exit);
+    std::cerr << std::format("initial exit path: {}", path_to_exit) << std::endl;
     auto [start_exit_suffixes, steps_to_lhs] = GetOtherExitsSuffixes(mat, path_to_exit, height, width);
 
     Labirinth labirinth(height, width);
@@ -47,6 +48,8 @@ auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int32_t seed) -
         ExploreLabirinth(labirinth, mat, other_exit, path_to_exit+std::string(suffix.begin(), std::prev(suffix.end())), other_exit_suffixes);
         exits.push_back({other_exit, other_exit_suffixes});
     }
+
+    std::cerr << std::format("iswall {}", labirinth.IsWall({1, 2}, 'E').value()) << std::endl;
 
     Table table;
     BuildPrefixes(table, labirinth);

@@ -23,14 +23,19 @@ auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
             auto is_wall = labirinth.IsWall(pos, direction);
             assert(is_wall.has_value());
 
+            auto next = MakeMove(pos, direction);
+
+            if (next.first < 0 || next.second < 0 || next.first >= labirinth.GetHeight() || next.second >= labirinth.GetWidth()) {
+                continue;
+            }
+
             if (is_wall.value()) {
                 table.AddPrefix(path+direction);
                 continue;
             }
 
-            auto next = MakeMove(pos, direction);
-
             if (used[next.first][next.second]) {
+                table.AddPrefix(path+direction);
                 continue;
             }
 
