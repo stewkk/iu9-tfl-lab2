@@ -40,7 +40,7 @@ auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
     }
 }
 
-auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<std::pair<Exit, const std::vector<std::string>&>> exits) -> void {
+auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<std::pair<Exit, std::vector<std::string>>> exits) -> void {
     struct BfsState {
         Position pos;
         std::string path;

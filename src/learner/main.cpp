@@ -10,9 +10,9 @@ auto main(int argc, char* argv[]) -> int {
         try {
           std::ifstream params(argv[1]);
           params.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-          std::int32_t n, m;
-          params >> n >> m;
-          if (learner::BuildDfaTable(n, m)) {
+          std::int32_t height, width, seed;
+          params >> height >> width >> seed;
+          if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
           } else {
             std::cerr << "FAILED" << std::endl;
@@ -23,11 +23,12 @@ auto main(int argc, char* argv[]) -> int {
         }
     }
 
-    if (argc == 3) {
+    if (argc == 4) {
         try {
-          std::int32_t n = std::stoi(argv[1]);
-          std::int32_t m = std::stoi(argv[2]);
-          if (learner::BuildDfaTable(n, m)) {
+          std::int32_t height = std::stoi(argv[1]);
+          std::int32_t width = std::stoi(argv[2]);
+          std::int32_t seed = std::stoi(argv[3]);
+          if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
           } else {
             std::cerr << "FAILED" << std::endl;

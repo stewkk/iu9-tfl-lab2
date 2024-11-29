@@ -4,7 +4,7 @@
 
 namespace learner {
 
-auto BuildDfaTable(std::int32_t n, std::int32_t m) -> bool;
+auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int32_t seed) -> bool;
 
 }  // namespace learner
 

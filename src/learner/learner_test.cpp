@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include <learner/learner.hpp>
 #include <learner/direction.hpp>
 #include <learner/mat_advanced12iq.hpp>
 #include <learner/mat_language.hpp>
@@ -101,20 +102,6 @@ TEST(GetOtherExitsSuffixesTest, ManyExits) {
 
     std::vector<std::string> expected{"WS", "ESW", "ESSSWN", "ESSSWWN", "WWSE", "WWSSE"};
     ASSERT_EQ(got, expected);
-}
-
-TEST(TODO, TODO) {
-    auto seed = 10;
-    auto width = 2;
-    auto height = 2;
-    // NOTE:
-    //      _
-    //     |   |
-    //     | | |
-    //      ‾ ‾
-    auto mat = learner::MATadvanced12iq(seed, height, width);
-
-    // NOTE: example path from MAT: "NNSEWNESSNN"sv
 }
 
 TEST(LabirinthTest, IsWall) {
@@ -352,7 +339,7 @@ TEST(TableTest, BuildSuffixes) {
   //      ‾ ‾
   auto mat = learner::MATadvanced12iq(seed, height, width);
   ExploreLabirinth(l, mat, exit, "EN", other_exits_suffixes);
-  std::vector<std::pair<learner::Exit, const std::vector<std::string>&>> exits{{exit, other_exits_suffixes}};
+  std::vector<std::pair<learner::Exit, std::vector<std::string>>> exits{{exit, other_exits_suffixes}};
 
   BuildSuffixes(t, l, exits);
   auto got = t.GetSuffixes();
@@ -385,4 +372,14 @@ TEST(TableTest, BuildOuterSuffixes) {
 
   std::vector<std::string> expected{ "WS", "EES", "NWS", "NEES", "NNWS", "NNEES", "NNNWS", "NNNEES", "WNNNEES", "ES", "ENNNWS", "S" };
   ASSERT_EQ(got, expected);
+}
+
+TEST(LearnerTest, BuildEquivalentTable) {
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  auto seed = 10;
+
+  auto got = learner::BuildDfaTable(height, width, seed);
+
+  ASSERT_EQ(got, true);
 }
