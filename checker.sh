@@ -1,11 +1,11 @@
 set -e
-HEIGHT=8
-WIDTH=8
+HEIGHT=10
+WIDTH=10
 for((i = 1; ; ++i)); do
     echo "Run test: "  $i
     RANDOM_SEED=$(date +%s%N)
     echo "With seed: "  $RANDOM_SEED
-    time build/bin/learner "$HEIGHT" "$WIDTH" "$RANDOM_SEED" 2>/dev/null || break
+    time build/bin/learner "$HEIGHT" "$WIDTH" "$RANDOM_SEED" 2>>/tmp/tfl-lab2-logs || break
     echo "Passed test: "  $i
 done
 

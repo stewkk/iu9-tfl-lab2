@@ -14,7 +14,7 @@ namespace learner {
 
 class MATadvanced12iq {
 public:
-        MATadvanced12iq(std::int32_t seed, std::int32_t height, std::int32_t width);
+        MATadvanced12iq(std::int64_t seed, std::int32_t height, std::int32_t width);
         ~MATadvanced12iq();
         MATadvanced12iq(const MATadvanced12iq&) = delete;
         MATadvanced12iq& operator=(const MATadvanced12iq&) = delete;

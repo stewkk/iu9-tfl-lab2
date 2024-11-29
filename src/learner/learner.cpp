@@ -11,7 +11,7 @@
 
 namespace learner {
 
-auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int32_t seed) -> bool {
+auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int64_t seed) -> bool {
     learner::MATadvanced12iq mat(seed, height, width);
 
     Table empty_table;
@@ -48,8 +48,6 @@ auto BuildDfaTable(std::int32_t height, std::int32_t width, std::int32_t seed) -
         ExploreLabirinth(labirinth, mat, other_exit, path_to_exit+std::string(suffix.begin(), std::prev(suffix.end())), other_exit_suffixes);
         exits.push_back({other_exit, other_exit_suffixes});
     }
-
-    std::cerr << std::format("iswall {}", labirinth.IsWall({1, 2}, 'E').value()) << std::endl;
 
     Table table;
     BuildPrefixes(table, labirinth);

@@ -10,7 +10,8 @@ auto main(int argc, char* argv[]) -> int {
         try {
           std::ifstream params(argv[1]);
           params.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-          std::int32_t height, width, seed;
+          std::int32_t height, width;
+          std::int64_t seed;
           params >> height >> width >> seed;
           if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
@@ -29,7 +30,7 @@ auto main(int argc, char* argv[]) -> int {
         try {
           std::int32_t height = std::stoi(argv[1]);
           std::int32_t width = std::stoi(argv[2]);
-          std::int32_t seed = std::stoll(argv[3]);
+          std::int64_t seed = std::stoll(argv[3]);
           if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
             return 0;

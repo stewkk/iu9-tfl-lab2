@@ -4,12 +4,13 @@
 #include <format>
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 namespace learner {
 
 namespace {
 
-boost::process::environment GetCustomEnv(std::int32_t seed, std::int32_t height, std::int32_t width) {
+boost::process::environment GetCustomEnv(std::int64_t seed, std::int32_t height, std::int32_t width) {
     boost::process::environment env = boost::this_process::environment();
     env["RANDOM_SEED"] = std::to_string(seed);
     env["HEIGHT"] = std::to_string(height);
@@ -27,7 +28,7 @@ auto QueryContains(std::istream& in, std::ostream& out, const std::string_view s
     std::string ans;
     in >> ans;
 
-    std::cerr << std::format("QueryContains({}) == {}\n", s, ans);
+    // std::cerr << std::format("QueryContains({}) == {}\n", s, ans);
 
     if (ans == "True") {
         return true;
@@ -41,7 +42,7 @@ auto QueryContains(std::istream& in, std::ostream& out, const std::string_view s
 }  // namespace
 
 
-MATadvanced12iq::MATadvanced12iq(std::int32_t seed, std::int32_t height,
+MATadvanced12iq::MATadvanced12iq(std::int64_t seed, std::int32_t height,
                                  std::int32_t width)
     : mat_in_(), mat_out_(), mat_process_() {
   mat_process_ = boost::process::child(
@@ -91,11 +92,19 @@ auto MATadvanced12iq::Equivalent(const Table& table) -> std::optional<std::strin
 
     ss << "end" << std::endl;
 
-    std::cerr << ss.str() << std::flush;
+    std::cerr << "sent equiv request" << std::endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    // std::cerr << ss.str() << std::flush;
     mat_in_ << ss.str() << std::flush;
 
     std::string ans;
     mat_out_ >> ans;
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> ms_double = t2 - t1;
+    std::cerr << ms_double.count() << "ms" << std::endl;
+
     if (ans == "TRUE") {
         return std::nullopt;
     }
