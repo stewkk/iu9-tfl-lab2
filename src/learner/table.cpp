@@ -10,4 +10,12 @@ auto Table::GetPrefixes() const -> const std::vector<std::string>& {
     return prefixes_;
 }
 
+auto Table::AddSuffix(std::string prefix) -> void {
+    suffixes_.push_back(std::move(prefix));
+}
+
+auto Table::GetSuffixes() const -> const std::vector<std::string>& {
+    return suffixes_;
+}
+
 }  // namespace learner

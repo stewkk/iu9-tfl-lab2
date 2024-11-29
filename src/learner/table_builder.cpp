@@ -4,6 +4,9 @@
 #include <utility>
 #include <cassert>
 
+#include <format>
+#include <iostream>
+
 namespace learner {
 
 auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
@@ -36,6 +39,66 @@ auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
             used[next.first][next.second] = true;
         }
     }
+}
+
+auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<std::pair<Exit, const std::vector<std::string>&>> exits) -> void {
+    struct BfsState {
+        Position pos;
+        std::string path;
+        const std::vector<std::string>& other_exit_suffixes;
+    };
+    std::queue<BfsState> q;
+    std::vector<std::vector<char>> used(labirinth.GetHeight(), std::vector<char>(labirinth.GetWidth(), false));
+    for (const auto& exit : exits) {
+        {
+            auto [x, y] = exit.first.pos;
+            used[x][y] = true;
+        }
+        auto [x, y] = MakeMove(exit.first.pos, LeftOf(LeftOf(exit.first.direction)));
+        used[x][y] = true;
+        q.push(BfsState{
+                .pos = {x, y},
+                .path = std::string{exit.first.direction},
+                .other_exit_suffixes = exit.second,
+            });
+    }
+
+    while (!q.empty()) {
+        auto state = q.front();
+        q.pop();
+
+        std::string reversed_path(state.path.rbegin(), state.path.rend());
+        for (const auto& other_exit_suffix : state.other_exit_suffixes) {
+            table.AddSuffix(reversed_path+other_exit_suffix);
+        }
+        std::cerr << std::format("({}, {}): {}", state.pos.first, state.pos.second, reversed_path) << std::endl;
+        table.AddSuffix(std::move(reversed_path));
+
+        for (auto direction : {'N', 'S', 'W', 'E'}) {
+            auto is_wall = labirinth.IsWall(state.pos, direction);
+            assert(is_wall.has_value());
+            if (is_wall.value()) {
+                continue;
+            }
+
+            auto next = MakeMove(state.pos, direction);
+            if (used[next.first][next.second]) {
+                continue;
+            }
+
+            std::cerr << std::format("go ({}, {}): {}", next.first, next.second, state.path + LeftOf(LeftOf(direction))) << std::endl;
+            q.push(BfsState{
+                .pos = next,
+                .path = state.path + LeftOf(LeftOf(direction)),
+                .other_exit_suffixes = state.other_exit_suffixes,
+            });
+            used[next.first][next.second] = true;
+        }
+    }
+}
+
+auto BuildOuterExitsSuffixes(Table& table, const Labirinth& labirinth) -> void {
+    // TODO
 }
 
 }  // namespace learner
