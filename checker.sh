@@ -1,12 +1,11 @@
 set -e
-HEIGHT=3
-WIDTH=3
+HEIGHT=8
+WIDTH=8
 for((i = 1; ; ++i)); do
     echo "Run test: "  $i
     RANDOM_SEED=$(date +%s%N)
     echo "With seed: "  $RANDOM_SEED
-    rm -f fifo logs mat.log && mkfifo fifo && time build/bin/learner "$HEIGHT" "$WIDTH" < fifo | HEIGHT="$HEIGHT" WIDTH="$WIDTH" RANDOM_SEED="$RANDOM_SEED" python mat/advanced12iq/main.py 2>mat.errlogs > fifo || echo "Done"
-    grep "Success" logs || break
+    time build/bin/learner "$HEIGHT" "$WIDTH" "$RANDOM_SEED" 2>/dev/null || break
     echo "Passed test: "  $i
 done
 

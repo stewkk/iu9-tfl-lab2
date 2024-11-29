@@ -14,12 +14,14 @@ auto main(int argc, char* argv[]) -> int {
           params >> height >> width >> seed;
           if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
-          } else {
-            std::cerr << "FAILED" << std::endl;
+            return 0;
           }
-          return 0;
+
+          std::cerr << "FAILED" << std::endl;
+          return 1;
         } catch (const std::exception& _) {
             std::cerr << "error reading parameters from parameters.txt\n";
+            return 1;
         }
     }
 
@@ -27,16 +29,20 @@ auto main(int argc, char* argv[]) -> int {
         try {
           std::int32_t height = std::stoi(argv[1]);
           std::int32_t width = std::stoi(argv[2]);
-          std::int32_t seed = std::stoi(argv[3]);
+          std::int32_t seed = std::stoll(argv[3]);
           if (learner::BuildDfaTable(height, width, seed)) {
             std::cerr << "OK" << std::endl;
-          } else {
-            std::cerr << "FAILED" << std::endl;
+            return 0;
           }
-          return 0;
-        } catch (const std::exception& _) {}
+
+          std::cerr << "FAILED" << std::endl;
+          return 1;
+        } catch (const std::exception& e) {
+          std::cerr << e.what() << std::endl;
+          return 1;
+        }
     }
 
-    std::cout << "Usage:\nlearner [path to parameters.txt]\nlearner [n] \n[m]\n";
-    return 0;
+    std::cout << "Usage:\nlearner [path to parameters.txt]\nlearner [height] [width] [seed]\n";
+    return 1;
 }

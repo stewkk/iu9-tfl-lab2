@@ -25,9 +25,9 @@ auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
 
             auto next = MakeMove(pos, direction);
 
-            if (next.first < 0 || next.second < 0 || next.first >= labirinth.GetHeight() || next.second >= labirinth.GetWidth()) {
-                continue;
-            }
+            // if (next.first < 0 || next.second < 0 || next.first >= labirinth.GetHeight() || next.second >= labirinth.GetWidth()) {
+            //     continue;
+            // }
 
             if (is_wall.value()) {
                 table.AddPrefix(path+direction);
@@ -46,6 +46,7 @@ auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
 }
 
 auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<std::pair<Exit, std::vector<std::string>>> exits) -> void {
+    table.AddSuffix("");
     struct BfsState {
         Position pos;
         std::string path;
