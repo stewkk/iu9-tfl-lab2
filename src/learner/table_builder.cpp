@@ -4,9 +4,6 @@
 #include <utility>
 #include <cassert>
 
-#include <format>
-#include <iostream>
-
 namespace learner {
 
 auto BuildPrefixes(Table& table, const Labirinth& labirinth) -> void {
@@ -71,7 +68,6 @@ auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<s
         for (const auto& other_exit_suffix : state.other_exit_suffixes) {
             table.AddSuffix(reversed_path+other_exit_suffix);
         }
-        std::cerr << std::format("({}, {}): {}", state.pos.first, state.pos.second, reversed_path) << std::endl;
         table.AddSuffix(std::move(reversed_path));
 
         for (auto direction : {'N', 'S', 'W', 'E'}) {
@@ -86,7 +82,6 @@ auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<s
                 continue;
             }
 
-            std::cerr << std::format("go ({}, {}): {}", next.first, next.second, state.path + LeftOf(LeftOf(direction))) << std::endl;
             q.push(BfsState{
                 .pos = next,
                 .path = state.path + LeftOf(LeftOf(direction)),
@@ -97,8 +92,8 @@ auto BuildSuffixes(Table& table, const Labirinth& labirinth, const std::vector<s
     }
 }
 
-auto BuildOuterExitsSuffixes(Table& table, const Labirinth& labirinth) -> void {
-    // TODO
+auto BuildOuterSuffixes(Table& table, const Labirinth& labirinth) -> void {
+
 }
 
 }  // namespace learner

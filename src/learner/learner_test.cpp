@@ -360,3 +360,29 @@ TEST(TableTest, BuildSuffixes) {
   std::vector<std::string> expected{ "N", "NN", "EN", "NEN" };
   ASSERT_EQ(got, expected);
 }
+
+TEST(TableTest, BuildOuterSuffixes) {
+  learner::Table t;
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::vector<std::string> other_exits_suffixes;
+  SetExits(l, exit, other_exits_suffixes);
+  FillBorders(l);
+  auto seed = 10;
+  // NOTE:
+  //      _
+  //     |   |
+  //     | | |
+  //      ‾ ‾
+  auto mat = learner::MATadvanced12iq(seed, height, width);
+  ExploreLabirinth(l, mat, exit, "EN", other_exits_suffixes);
+  std::vector<std::pair<learner::Exit, const std::vector<std::string>&>> exits{{exit, other_exits_suffixes}};
+
+  learner::BuildOuterSuffixes(t, l);
+  auto got = t.GetSuffixes();
+
+  std::vector<std::string> expected{ "N", "NN", "EN", "NEN" };
+  ASSERT_EQ(got, expected);
+}
