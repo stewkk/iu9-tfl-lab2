@@ -11,6 +11,8 @@
 #include <learner/exits.hpp>
 #include <learner/labirinth.hpp>
 #include <learner/labirinth_builder.hpp>
+#include <learner/table.hpp>
+#include <learner/table_builder.hpp>
 
 using std::literals::operator""s;
 using std::literals::operator""sv;
@@ -292,6 +294,43 @@ TEST(LabirinthTest, ExploreLabirinthWithMultipleExits) {
   }
 }
 
-TEST(LabirinthTest, BuildTablePrefixes) {
+TEST(TableTest, AddPrefix) {
+  learner::Table t;
 
+  t.AddPrefix("oaoa");
+  auto got = t.GetPrefixes();
+
+  std::vector<std::string> expected{"oaoa"};
+  ASSERT_EQ(got, expected);
+}
+
+TEST(TableTest, BuildPrefixes) {
+  learner::Table t;
+  std::int32_t height = 2;
+  std::int32_t width = 2;
+  learner::Labirinth l(height, width);
+  learner::Exit exit{.pos = {0, 2}, .direction = 'N'};
+  std::vector<std::string> other_exits_suffixes;
+  SetExits(l, exit, other_exits_suffixes);
+  FillBorders(l);
+  auto seed = 10;
+  // NOTE:
+  //      _
+  //     |   |
+  //     | | |
+  //      ‾ ‾
+  auto mat = learner::MATadvanced12iq(seed, height, width);
+  ExploreLabirinth(l, mat, exit, "EN", other_exits_suffixes);
+
+  BuildPrefixes(t, l);
+  auto got = t.GetPrefixes();
+
+  std::vector<std::string> expected{
+      "",     "N",     "W",     "S",     "SS",     "SW",     "SE",    "E",
+      "EE",   "EN",    "ENN",   "ES",    "ESS",    "ESW",    "ESE",   "ENW",
+      "ENWN", "ENWS",  "ENE",   "ENEN",  "ENEE",   "ENWW",   "ENWWN", "ENWWW",
+      "ENES", "ENESW", "ENESE", "ENWWS", "ENWWSW", "ENWWSE", "ENESS", "ENESSW"};
+  for (auto path : expected) {
+    ASSERT_NE(std::find(got.begin(), got.end(), path), got.end());
+  }
 }
