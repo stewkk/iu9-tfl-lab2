@@ -1,3 +1,4 @@
 [submodule "mat/advanced12iq"]
 	path = mat/advanced12iq
-	url = git@github.com:advanced12iq/tfl-lab2.git
+	url = git@github.com:stewkk/iu9-tfl-lab2.git
+	branch = impl-dumb-learner
