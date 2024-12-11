@@ -1,0 +1,7 @@
+#+title: Issues
+
+* sync_with_stdio(false)
+* clog вместо cerr
+* -O3
+* интеграция с МАТ Талгата
+* интеграция с МАТ Леши
